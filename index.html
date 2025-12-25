@@ -1,18 +1,28 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-91ELYC98RZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-91ELYC98RZ');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-91ELYC98RZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-91ELYC98RZ');
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Car Gallery</title>
+    <meta name="description" content="Explore the ultimate car gallery featuring sports cars, luxury vehicles, electric cars, and classics. Search, compare, and discover your dream car!">
+    <meta name="keywords" content="cars, sports cars, luxury cars, electric cars, car gallery, Ferrari, Lamborghini, Tesla, Porsche">
+    <meta name="author" content="Car Gallery">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Ultimate Car Gallery - Discover Amazing Cars">
+    <meta property="og:description" content="Browse, search, and compare the world's most amazing cars. Features sports cars, luxury vehicles, and electric supercars.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=80">
+    
+    <title>Ultimate Car Gallery - Explore Amazing Cars</title>
     <style>
         * {
             margin: 0;
@@ -551,10 +561,72 @@
         .notification.success { background: #4CAF50; color: white; }
         .notification.info { background: #2196F3; color: white; }
 
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 20px;
+            display: none;
+            z-index: 3000;
+            animation: slideUp 0.4s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .cookie-text {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cookie-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .cookie-btn.accept {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .cookie-btn.decline {
+            background: #f44336;
+            color: white;
+        }
+
+        .cookie-btn:hover {
+            transform: scale(1.05);
+        }
+
         @media (max-width: 768px) {
             h1 { font-size: 1.8em; }
             .gallery { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
             .tabs { justify-content: flex-start; }
+            .cookie-content { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -650,6 +722,20 @@
     </div>
 
     <div class="notification" id="notification"></div>
+
+    <!-- Cookie Consent Banner -->
+    <div class="cookie-banner" id="cookieBanner">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <strong>🍪 We use cookies</strong><br>
+                This website uses Google Analytics to understand how visitors use the site. We respect your privacy and don't collect personal information.
+            </div>
+            <div class="cookie-buttons">
+                <button class="cookie-btn accept" onclick="acceptCookies()">Accept</button>
+                <button class="cookie-btn decline" onclick="declineCookies()">Decline</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const cars = [
@@ -840,6 +926,35 @@
         let currentImageIndex = {};
         let quizScore = 0;
         let currentQuizCar = null;
+
+        // Cookie Consent Management
+        function showCookieBanner() {
+            const consent = localStorage.getItem('cookieConsent');
+            if (!consent) {
+                document.getElementById('cookieBanner').style.display = 'block';
+            }
+        }
+
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'accepted');
+            document.getElementById('cookieBanner').style.display = 'none';
+            showNotification('Cookie preferences saved!', 'success');
+            
+            // Enable Google Analytics
+            window['ga-disable-G-91ELYC98RZ'] = false;
+        }
+
+        function declineCookies() {
+            localStorage.setItem('cookieConsent', 'declined');
+            document.getElementById('cookieBanner').style.display = 'none';
+            showNotification('Cookie preferences saved!', 'info');
+            
+            // Disable Google Analytics
+            window['ga-disable-G-91ELYC98RZ'] = true;
+        }
+
+        // Show cookie banner on page load
+        window.addEventListener('load', showCookieBanner);
 
         function displayCars(carsToDisplay) {
             const gallery = document.getElementById('gallery');
@@ -1173,5 +1288,4 @@
         displayCars(cars);
     </script>
 </body>
-
 </html>
