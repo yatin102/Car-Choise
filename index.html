@@ -1,0 +1,1167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Car Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --bg-light: #f5f5f5;
+            --bg-dark: #1a1a2e;
+            --card-light: #ffffff;
+            --card-dark: #16213e;
+            --text-light: #333;
+            --text-dark: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        body.light-mode {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text-light);
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark-mode .header {
+            background: var(--card-dark);
+        }
+
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--primary);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+
+        .dark-mode .search-suggestions {
+            background: var(--card-dark);
+        }
+
+        .suggestion-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 12px 20px;
+            font-size: 14px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dark-mode select, .dark-mode button {
+            background: var(--card-dark);
+            color: var(--text-dark);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+        }
+
+        button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .dark-mode .tab {
+            background: rgba(22, 33, 62, 0.7);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .view-modes {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .dark-mode .mode-btn {
+            background: var(--card-dark);
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .car-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            animation: fadeIn 0.5s;
+            position: relative;
+        }
+
+        .dark-mode .car-card {
+            background: var(--card-dark);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .car-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.2s;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .favorite-btn.active {
+            color: #ff4757;
+        }
+
+        .compare-checkbox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .image-slider {
+            position: relative;
+            height: 220px;
+            overflow: hidden;
+        }
+
+        .slider-images {
+            display: flex;
+            transition: transform 0.3s;
+            height: 100%;
+        }
+
+        .slider-images img {
+            min-width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .slider-nav {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .slider-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .slider-dot.active {
+            background: white;
+        }
+
+        .car-info {
+            padding: 20px;
+        }
+
+        .car-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .car-category {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+
+        .car-specs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .car-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .stars {
+            color: #ffd700;
+        }
+
+        .car-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .dark-mode .btn-secondary {
+            background: #2a2a3e;
+            color: var(--text-dark);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            max-width: 900px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .dark-mode .modal-content {
+            background: var(--card-dark);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 35px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .modal-image {
+            width: 100%;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-modal .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .comparison-card {
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .comparison-card img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .share-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+        }
+
+        .quiz-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .dark-mode .quiz-section {
+            background: var(--card-dark);
+        }
+
+        .quiz-image {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+
+        .notification.success { background: #4CAF50; color: white; }
+        .notification.info { background: #2196F3; color: white; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .gallery { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+            .tabs { justify-content: flex-start; }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <div class="container">
+        <div class="header">
+            <div class="title-row">
+                <h1>🚗 Ultimate Car Gallery</h1>
+                <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+            </div>
+
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search cars..." oninput="showSuggestions()">
+                    <div class="search-suggestions" id="suggestions"></div>
+                </div>
+                <button class="primary" onclick="searchCar()">Search</button>
+                <button class="primary" onclick="showAll()">Show All</button>
+            </div>
+
+            <div class="filter-section">
+                <select id="categoryFilter" onchange="applyFilters()">
+                    <option value="all">All Categories</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Luxury">Luxury</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Classic">Classic</option>
+                    <option value="SUV">SUV</option>
+                </select>
+                <select id="sortBy" onchange="applyFilters()">
+                    <option value="name">Sort by Name</option>
+                    <option value="price">Sort by Price</option>
+                    <option value="rating">Sort by Rating</option>
+                    <option value="speed">Sort by Speed</option>
+                </select>
+                <button class="primary" onclick="showFavorites()">❤️ Favorites (<span id="favCount">0</span>)</button>
+                <button class="primary" onclick="showComparison()">⚖️ Compare (<span id="compareCount">0</span>)</button>
+                <button class="primary" onclick="showQuiz()">🎮 Car Quiz</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="filterByTab('all')">All Cars</div>
+            <div class="tab" onclick="filterByTab('Sports')">🏎️ Sports</div>
+            <div class="tab" onclick="filterByTab('Luxury')">💎 Luxury</div>
+            <div class="tab" onclick="filterByTab('Electric')">⚡ Electric</div>
+            <div class="tab" onclick="filterByTab('Classic')">🎩 Classic</div>
+            <div class="tab" onclick="filterByTab('SUV')">🚙 SUV</div>
+        </div>
+
+        <div class="gallery" id="gallery"></div>
+    </div>
+
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('detailModal')">&times;</span>
+            <img class="modal-image" id="detailImage" src="" alt="">
+            <h2 id="detailName"></h2>
+            <p id="detailDescription"></p>
+            <div class="car-specs" id="detailSpecs"></div>
+            <div class="share-buttons">
+                <button class="share-btn" style="background:#1DA1F2" onclick="share('twitter')">🐦 Twitter</button>
+                <button class="share-btn" style="background:#4267B2" onclick="share('facebook')">📘 Facebook</button>
+                <button class="share-btn" style="background:#25D366" onclick="share('whatsapp')">💬 WhatsApp</button>
+                <button class="share-btn" style="background:#0A66C2" onclick="share('linkedin')">💼 LinkedIn</button>
+            </div>
+            <div class="car-actions" style="margin-top: 20px;">
+                <button class="action-btn btn-primary" onclick="downloadImage()">📥 Download</button>
+                <button class="action-btn btn-primary" onclick="copyLink()">🔗 Copy Link</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal comparison-modal" id="comparisonModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('comparisonModal')">&times;</span>
+            <h2>Car Comparison</h2>
+            <div class="comparison-grid" id="comparisonGrid"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="quizModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('quizModal')">&times;</span>
+            <div class="quiz-section">
+                <h2>🎮 Guess the Car!</h2>
+                <p>Score: <span id="quizScore">0</span></p>
+                <img class="quiz-image" id="quizImage" src="" alt="Guess this car">
+                <div class="quiz-options" id="quizOptions"></div>
+                <button class="primary" onclick="nextQuizQuestion()" style="margin-top: 20px;">Next Question</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        const cars = [
+            { 
+                name: "Ferrari F8 Tributo", 
+                images: ["https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&q=80", "https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=800&q=80"],
+                category: "Sports",
+                price: "$280,000",
+                hp: "710 HP",
+                speed: "211 mph",
+                acceleration: "2.9s",
+                year: "2024",
+                rating: 4.9,
+                description: "The Ferrari F8 Tributo is a mid-engine sports car that delivers exhilarating performance with its twin-turbo V8 engine."
+            },
+            { 
+                name: "Lamborghini Aventador", 
+                images: ["https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800&q=80", "https://images.unsplash.com/photo-1621135802920-133df287f89c?w=800&q=80"],
+                category: "Sports",
+                price: "$500,000",
+                hp: "769 HP",
+                speed: "217 mph",
+                acceleration: "2.8s",
+                year: "2024",
+                rating: 5.0,
+                description: "The Lamborghini Aventador combines aggressive styling with raw power, featuring a naturally aspirated V12 engine."
+            },
+            { 
+                name: "Porsche 911 Turbo S", 
+                images: ["https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80", "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800&q=80"],
+                category: "Sports",
+                price: "$207,000",
+                hp: "640 HP",
+                speed: "205 mph",
+                acceleration: "2.6s",
+                year: "2024",
+                rating: 4.8,
+                description: "The iconic Porsche 911 Turbo S offers perfect balance between everyday usability and track-ready performance."
+            },
+            { 
+                name: "BMW M4 Competition", 
+                images: ["https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80", "https://images.unsplash.com/photo-1617531653520-bd4f03430b1e?w=800&q=80"],
+                category: "Sports",
+                price: "$75,000",
+                hp: "503 HP",
+                speed: "180 mph",
+                acceleration: "3.8s",
+                year: "2024",
+                rating: 4.6,
+                description: "BMW's M4 Competition delivers precision handling and powerful performance with its inline-six twin-turbo engine."
+            },
+            { 
+                name: "Mercedes-AMG GT", 
+                images: ["https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80", "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80"],
+                category: "Luxury",
+                price: "$120,000",
+                hp: "523 HP",
+                speed: "193 mph",
+                acceleration: "3.7s",
+                year: "2024",
+                rating: 4.7,
+                description: "The Mercedes-AMG GT blends luxury with performance, featuring a handcrafted AMG V8 biturbo engine."
+            },
+            { 
+                name: "Audi R8 V10", 
+                images: ["https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&q=80", "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=800&q=80"],
+                category: "Sports",
+                price: "$150,000",
+                hp: "562 HP",
+                speed: "201 mph",
+                acceleration: "3.4s",
+                year: "2024",
+                rating: 4.7,
+                description: "The Audi R8 combines everyday drivability with supercar performance thanks to its naturally aspirated V10."
+            },
+            { 
+                name: "Tesla Model S Plaid", 
+                images: ["https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&q=80", "https://images.unsplash.com/photo-1617704548623-340376564e68?w=800&q=80"],
+                category: "Electric",
+                price: "$110,000",
+                hp: "1,020 HP",
+                speed: "200 mph",
+                acceleration: "1.99s",
+                year: "2024",
+                rating: 4.8,
+                description: "Tesla's Model S Plaid is the quickest production car, featuring tri-motor all-wheel drive and ludicrous acceleration."
+            },
+            { 
+                name: "McLaren 720S", 
+                images: ["https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&q=80", "https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=800&q=80"],
+                category: "Sports",
+                price: "$300,000",
+                hp: "710 HP",
+                speed: "212 mph",
+                acceleration: "2.8s",
+                year: "2024",
+                rating: 4.9,
+                description: "The McLaren 720S offers extraordinary performance and aerodynamic efficiency with its carbon fiber structure."
+            },
+            { 
+                name: "Bugatti Chiron", 
+                images: ["https://images.unsplash.com/photo-1566023888402-49a752e8a7e2?w=800&q=80", "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80"],
+                category: "Luxury",
+                price: "$3,000,000",
+                hp: "1,479 HP",
+                speed: "261 mph",
+                acceleration: "2.4s",
+                year: "2024",
+                rating: 5.0,
+                description: "The Bugatti Chiron is the ultimate hypercar with its quad-turbocharged W16 engine and unmatched luxury."
+            },
+            { 
+                name: "Corvette C8 Z06", 
+                images: ["https://images.unsplash.com/photo-1597404294360-feeadb4fc2ff?w=800&q=80", "https://images.unsplash.com/photo-1616455579100-2ceaa4eb2d37?w=800&q=80"],
+                category: "Sports",
+                price: "$106,000",
+                hp: "670 HP",
+                speed: "195 mph",
+                acceleration: "2.6s",
+                year: "2024",
+                rating: 4.8,
+                description: "America's supercar, the C8 Z06 features a naturally aspirated flat-plane crank V8 for incredible performance."
+            },
+            { 
+                name: "Ford Mustang GT", 
+                images: ["https://images.unsplash.com/photo-1584345604476-8ec5f5c5b66c?w=800&q=80", "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&q=80"],
+                category: "Classic",
+                price: "$45,000",
+                hp: "450 HP",
+                speed: "155 mph",
+                acceleration: "4.3s",
+                year: "2024",
+                rating: 4.5,
+                description: "The iconic Ford Mustang GT delivers American muscle car performance at an accessible price point."
+            },
+            { 
+                name: "Dodge Challenger SRT", 
+                images: ["https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=80", "https://images.unsplash.com/photo-1606220588913-b3aeb229d1f5?w=800&q=80"],
+                category: "Classic",
+                price: "$82,000",
+                hp: "807 HP",
+                speed: "203 mph",
+                acceleration: "3.5s",
+                year: "2024",
+                rating: 4.6,
+                description: "The Dodge Challenger SRT Hellcat offers brutal horsepower and retro styling in a modern package."
+            },
+            { 
+                name: "Range Rover Sport", 
+                images: ["https://images.unsplash.com/photo-1606220588913-b3aeb229d1f5?w=800&q=80", "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=80"],
+                category: "SUV",
+                price: "$85,000",
+                hp: "395 HP",
+                speed: "140 mph",
+                acceleration: "5.7s",
+                year: "2024",
+                rating: 4.5,
+                description: "The Range Rover Sport combines luxury, capability, and performance in a sophisticated SUV package."
+            },
+            { 
+                name: "Porsche Taycan Turbo S", 
+                images: ["https://images.unsplash.com/photo-1617886903355-9354bb57751f?w=800&q=80", "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=800&q=80"],
+                category: "Electric",
+                price: "$185,000",
+                hp: "750 HP",
+                speed: "161 mph",
+                acceleration: "2.6s",
+                year: "2024",
+                rating: 4.8,
+                description: "Porsche's first fully electric sports car delivers thrilling performance with zero emissions."
+            },
+            { 
+                name: "Rolls-Royce Phantom", 
+                images: ["https://images.unsplash.com/photo-1631295868223-63265b40d9e4?w=800&q=80", "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80"],
+                category: "Luxury",
+                price: "$460,000",
+                hp: "563 HP",
+                speed: "155 mph",
+                acceleration: "5.3s",
+                year: "2024",
+                rating: 5.0,
+                description: "The pinnacle of automotive luxury, the Rolls-Royce Phantom offers unparalleled comfort and craftsmanship."
+            }
+        ];
+
+        let favorites = [];
+        let compareList = [];
+        let currentImageIndex = {};
+        let quizScore = 0;
+        let currentQuizCar = null;
+
+        function displayCars(carsToDisplay) {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            
+            carsToDisplay.forEach((car, idx) => {
+                currentImageIndex[idx] = 0;
+                const isFav = favorites.includes(car.name);
+                
+                const card = document.createElement('div');
+                card.className = 'car-card';
+                card.innerHTML = `
+                    <input type="checkbox" class="compare-checkbox" onchange="toggleCompare('${car.name}')" ${compareList.includes(car.name) ? 'checked' : ''}>
+                    <button class="favorite-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${car.name}')">
+                        ${isFav ? '❤️' : '🤍'}
+                    </button>
+                    <div class="image-slider">
+                        <div class="slider-images" id="slider-${idx}">
+                            ${car.images.map(img => `<img src="${img}" alt="${car.name}" onclick="showDetails('${car.name}')">`).join('')}
+                        </div>
+                        <div class="slider-nav">
+                            ${car.images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}" onclick="changeSlide(${idx}, ${i})"></div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="car-info">
+                        <span class="car-category">${car.category}</span>
+                        <div class="car-name">${car.name}</div>
+                        <div class="car-rating">
+                            <span class="stars">${'★'.repeat(Math.floor(car.rating))}${'☆'.repeat(5 - Math.floor(car.rating))}</span>
+                            <span>${car.rating}</span>
+                        </div>
+                        <div class="car-specs">
+                            <div class="spec-item">💰 ${car.price}</div>
+                            <div class="spec-item">⚡ ${car.hp}</div>
+                            <div class="spec-item">🚀 ${car.speed}</div>
+                            <div class="spec-item">⏱️ ${car.acceleration}</div>
+                        </div>
+                        <div class="car-actions">
+                            <button class="action-btn btn-primary" onclick="showDetails('${car.name}')">Details</button>
+                            <button class="action-btn btn-secondary" onclick="copyCarLink('${car.images[0]}')">Copy Link</button>
+                            <button class="action-btn btn-secondary" onclick="downloadCarImage('${car.images[0]}', '${car.name}')">Download</button>
+                        </div>
+                    </div>
+                `;
+                gallery.appendChild(card);
+            });
+        }
+
+        function changeSlide(carIdx, imgIdx) {
+            currentImageIndex[carIdx] = imgIdx;
+            const slider = document.getElementById(`slider-${carIdx}`);
+            slider.style.transform = `translateX(-${imgIdx * 100}%)`;
+            
+            const dots = slider.parentElement.querySelectorAll('.slider-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === imgIdx);
+            });
+        }
+
+        function toggleFavorite(carName) {
+            if (favorites.includes(carName)) {
+                favorites = favorites.filter(n => n !== carName);
+            } else {
+                favorites.push(carName);
+            }
+            document.getElementById('favCount').textContent = favorites.length;
+            applyFilters();
+        }
+
+        function toggleCompare(carName) {
+            if (compareList.includes(carName)) {
+                compareList = compareList.filter(n => n !== carName);
+            } else {
+                if (compareList.length >= 4) {
+                    showNotification('You can compare up to 4 cars only', 'info');
+                    return;
+                }
+                compareList.push(carName);
+            }
+            document.getElementById('compareCount').textContent = compareList.length;
+        }
+
+        function showFavorites() {
+            if (favorites.length === 0) {
+                showNotification('No favorites yet! Click ❤️ on cars to add them.', 'info');
+                return;
+            }
+            const favCars = cars.filter(c => favorites.includes(c.name));
+            displayCars(favCars);
+        }
+
+        function showComparison() {
+            if (compareList.length < 2) {
+                showNotification('Select at least 2 cars to compare', 'info');
+                return;
+            }
+            
+            const modal = document.getElementById('comparisonModal');
+            const grid = document.getElementById('comparisonGrid');
+            grid.innerHTML = '';
+            
+            const compareCars = cars.filter(c => compareList.includes(c.name));
+            compareCars.forEach(car => {
+                grid.innerHTML += `
+                    <div class="comparison-card">
+                        <img src="${car.images[0]}" alt="${car.name}">
+                        <h3>${car.name}</h3>
+                        <p><strong>Price:</strong> ${car.price}</p>
+                        <p><strong>Power:</strong> ${car.hp}</p>
+                        <p><strong>Top Speed:</strong> ${car.speed}</p>
+                        <p><strong>0-60:</strong> ${car.acceleration}</p>
+                        <p><strong>Rating:</strong> ${car.rating} ⭐</p>
+                    </div>
+                `;
+            });
+            
+            modal.style.display = 'block';
+        }
+
+        function showDetails(carName) {
+            const car = cars.find(c => c.name === carName);
+            const modal = document.getElementById('detailModal');
+            
+            document.getElementById('detailImage').src = car.images[0];
+            document.getElementById('detailName').textContent = car.name;
+            document.getElementById('detailDescription').textContent = car.description;
+            
+            const specs = document.getElementById('detailSpecs');
+            specs.innerHTML = `
+                <div class="spec-item">💰 Price: ${car.price}</div>
+                <div class="spec-item">⚡ Power: ${car.hp}</div>
+                <div class="spec-item">🚀 Top Speed: ${car.speed}</div>
+                <div class="spec-item">⏱️ 0-60: ${car.acceleration}</div>
+                <div class="spec-item">📅 Year: ${car.year}</div>
+                <div class="spec-item">⭐ Rating: ${car.rating}/5</div>
+            `;
+            
+            modal.style.display = 'block';
+            window.currentDetailCar = car;
+        }
+
+        function showQuiz() {
+            const modal = document.getElementById('quizModal');
+            modal.style.display = 'block';
+            quizScore = 0;
+            document.getElementById('quizScore').textContent = quizScore;
+            nextQuizQuestion();
+        }
+
+        function nextQuizQuestion() {
+            const randomCar = cars[Math.floor(Math.random() * cars.length)];
+            currentQuizCar = randomCar;
+            
+            document.getElementById('quizImage').src = randomCar.images[0];
+            
+            const wrongOptions = cars.filter(c => c.name !== randomCar.name)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 3)
+                .map(c => c.name);
+            
+            const options = [...wrongOptions, randomCar.name].sort(() => 0.5 - Math.random());
+            
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = '';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.onclick = () => checkQuizAnswer(opt);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(answer) {
+            if (answer === currentQuizCar.name) {
+                quizScore++;
+                document.getElementById('quizScore').textContent = quizScore;
+                showNotification('Correct! 🎉', 'success');
+            } else {
+                showNotification(`Wrong! It was ${currentQuizCar.name}`, 'info');
+            }
+            
+            setTimeout(nextQuizQuestion, 1500);
+        }
+
+        function searchCar() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = cars.filter(car => 
+                car.name.toLowerCase().includes(query) ||
+                car.category.toLowerCase().includes(query)
+            );
+            displayCars(filtered);
+        }
+
+        function showSuggestions() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const suggestions = document.getElementById('suggestions');
+            
+            if (query.length < 2) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            const matches = cars.filter(car => 
+                car.name.toLowerCase().includes(query) ||
+                car.category.toLowerCase().includes(query)
+            ).slice(0, 5);
+            
+            if (matches.length > 0) {
+                suggestions.innerHTML = matches.map(car => 
+                    `<div class="suggestion-item" onclick="selectSuggestion('${car.name}')">${car.name}</div>`
+                ).join('');
+                suggestions.style.display = 'block';
+            } else {
+                suggestions.style.display = 'none';
+            }
+        }
+
+        function selectSuggestion(name) {
+            document.getElementById('searchInput').value = name;
+            document.getElementById('suggestions').style.display = 'none';
+            searchCar();
+        }
+
+        function applyFilters() {
+            let filtered = [...cars];
+            
+            const category = document.getElementById('categoryFilter').value;
+            if (category !== 'all') {
+                filtered = filtered.filter(c => c.category === category);
+            }
+            
+            const sortBy = document.getElementById('sortBy').value;
+            if (sortBy === 'name') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortBy === 'price') {
+                filtered.sort((a, b) => parseInt(a.price.replace(/\D/g, '')) - parseInt(b.price.replace(/\D/g, '')));
+            } else if (sortBy === 'rating') {
+                filtered.sort((a, b) => b.rating - a.rating);
+            } else if (sortBy === 'speed') {
+                filtered.sort((a, b) => parseInt(b.speed) - parseInt(a.speed));
+            }
+            
+            displayCars(filtered);
+        }
+
+        function filterByTab(category) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (category === 'all') {
+                displayCars(cars);
+            } else {
+                displayCars(cars.filter(c => c.category === category));
+            }
+        }
+
+        function showAll() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = 'all';
+            displayCars(cars);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function copyLink() {
+            const url = window.currentDetailCar.images[0];
+            navigator.clipboard.writeText(url);
+            showNotification('Link copied to clipboard!', 'success');
+        }
+
+        function copyCarLink(url) {
+            navigator.clipboard.writeText(url);
+            showNotification('Link copied!', 'success');
+        }
+
+        function downloadImage() {
+            downloadCarImage(window.currentDetailCar.images[0], window.currentDetailCar.name);
+        }
+
+        function downloadCarImage(url, name) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name}.jpg`;
+            a.target = '_blank';
+            a.click();
+            showNotification('Download started!', 'success');
+        }
+
+        function share(platform) {
+            const car = window.currentDetailCar;
+            const text = `Check out this ${car.name}!`;
+            const url = car.images[0];
+            
+            const urls = {
+                twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+                facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+                whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`,
+                linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+            };
+            
+            window.open(urls[platform], '_blank');
+        }
+
+        function showNotification(message, type) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = `notification ${type}`;
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', 3000);
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') searchCar();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box')) {
+                document.getElementById('suggestions').style.display = 'none';
+            }
+        });
+
+        displayCars(cars);
+    </script>
+</body>
+</html>
